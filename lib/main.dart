@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:todo/Models/componants.dart';
+import 'package:todo/services/manager.dart';
+import 'package:todo/services/provider.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -13,11 +17,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ChangeNotifierProvider<TaskProvider>(
+          create: (context) => TaskProvider(), child:  MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter ',
-      home: Start(),
-    );
+      
+      home:Start() ,
+    ));
+    
   }
 }
 
@@ -29,14 +35,10 @@ class Start extends StatefulWidget {
 class _StartState extends State<Start> {
   TextEditingController lmodir = TextEditingController();
 
-  List tasks = [
-    {"text": "buy milk", "checked": false},
-    {"text": "buy egg", "checked": false},
-    {"text": "buy veg", "checked": false}
-  ];
   bool checkval = false;
   @override
   Widget build(BuildContext context) {
+    var tasks = Provider.of<TaskProvider>(context).GetTasks;
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 38, 182, 249),
       body: SafeArea(
@@ -80,31 +82,15 @@ class _StartState extends State<Start> {
               child: Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: Container(
-                    padding: EdgeInsets.fromLTRB(30, 40, 30, 30),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(30),
-                          topLeft: Radius.circular(30),
-                        )),
-                    child: ListView.builder(
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) {
-                          checkval = tasks[index]["checked"];
-                          return ListTile(
-                              title: Text(tasks[index]["text"],
-                                  style: TextStyle(
-                                      decoration: checkval
-                                          ? TextDecoration.lineThrough
-                                          : null)),
-                              trailing: Checkbox(
-                                  value: checkval,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      tasks[index]["checked"] = value!;
-                                    });
-                                  }));
-                        })),
+                  padding: EdgeInsets.fromLTRB(30, 40, 30, 30),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(30),
+                        topLeft: Radius.circular(30),
+                      )),
+                  child: TaskList(),
+                ),
               ),
             )
           ],
@@ -112,70 +98,7 @@ class _StartState extends State<Start> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return Container(
-                  color: Color(0xff757575),
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(30, 70, 30, 0),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(30),
-                          topLeft: Radius.circular(30),
-                        )),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Add Task',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 30.0,
-                              color: Colors.lightBlueAccent,
-                            ),
-                          ),
-                          TextField(
-                            autofocus: true,
-                            textAlign: TextAlign.center,
-                            onChanged: (newText) {},
-                            controller: lmodir,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 30.0, horizontal: 30),
-                            child: ButtonTheme(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.lightBlueAccent,
-                                  fixedSize: const Size(100, 55),
-                                  shape: const StadiumBorder(),
-                                ),
-                                child: Text(
-                                  "Add",
-                                  style: TextStyle(
-                                    fontSize: 25.0,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    tasks.add({
-                                      "text": lmodir.text,
-                                      "checked": false
-                                    });
-                                    lmodir.clear();
-                                    Navigator.pop(context);
-                                  });
-                                },
-                              ),
-                            ),
-                          )
-                        ]),
-                  ),
-                );
-              });
+          AddTaskScreen(context);
         },
         isExtended: true,
         child: Icon(Icons.add),
